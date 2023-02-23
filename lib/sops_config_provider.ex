@@ -20,8 +20,9 @@ defmodule SopsConfigProvider do
   end
 
   @impl true
-  @spec init(State.t() | term()) :: State.t()
+  @spec init(State.t() | map() | term()) :: State.t()
   def init(%State{} = state), do: state
+  def init(state) when is_map(state), do: state |> State.new!()
 
   def init(_),
     do: raise(InitStateError)

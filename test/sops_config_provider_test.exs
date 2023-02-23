@@ -19,7 +19,16 @@ defmodule SopsConfigProviderTest do
   @secret_file_path "priv/test_samples/test.yml"
 
   describe "init/1" do
-    test "should return state" do
+    test "when the argument is map" do
+      state = %{
+        app_name: :my_app,
+        secret_file_path: "/file_path"
+      }
+
+      assert(%State{} = SopsConfigProvider.init(state))
+    end
+
+    test "when the argument is State struct, should return state" do
       state =
         State.new!(
           app_name: :my_app,
