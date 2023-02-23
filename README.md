@@ -52,9 +52,5 @@ For example, if you have secrets config in yaml as below
 hello: world
 ```
 
-Then, you can call fetch the value with `Application.get_env(:sops, :hello) #
+Then, you can fetch the value with `Application.get_env(:sops, :hello) #
 => "world"`
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/sops_config_provider>.
