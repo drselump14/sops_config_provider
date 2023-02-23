@@ -62,7 +62,8 @@ defmodule SopsConfigProvider.MixProject do
       {:jason, "~> 1.4"},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:mock, "~> 0.3.0", only: [:test]},
+      {:rewire, "~> 0.9", only: [:test]},
+      {:hammox, "~> 0.7", only: [:test]},
       {:typed_struct, "~> 0.3.0"},
       {:yaml_elixir, "~> 2.9.0"}
     ]

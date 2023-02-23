@@ -3,9 +3,11 @@ defmodule SopsConfigProvider.StateTest do
 
   alias SopsConfigProvider.State
 
+  @app_name :sops_config_providerr
+
   setup do
     %{
-      app_name: :app_name,
+      app_name: @app_name,
       secret_file_path: "/secret_file_path"
     }
   end

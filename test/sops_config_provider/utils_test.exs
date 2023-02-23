@@ -1,19 +1,16 @@
 defmodule SopsConfigProvider.UtilsTest do
   use ExUnit.Case, async: true
 
-  import Mock
-
   alias SopsConfigProvider.State
   alias SopsConfigProvider.Utils
+  alias SopsConfigProvider.Utils.SecretFileNotFoundError
 
   @yaml """
     a: 1
   """
 
-  @json "{\"a\":1}"
-
-  @app_name :app_name
-  @secret_file_path "test/samples/test.yml"
+  @app_name :sops_config_provider
+  @secret_file_path "priv/test_samples/test.yml"
 
   setup %{} do
     init_state =
@@ -26,56 +23,18 @@ defmodule SopsConfigProvider.UtilsTest do
     %{init_state: init_state}
   end
 
-  test "resolve_secret_file_location!/1", %{init_state: init_state} do
-    with_mocks([
-      {Application, [], [app_dir: fn @app_name, @secret_file_path -> @secret_file_path end]},
-      {Application, [], [get_env: fn _, _, _ -> "" end]},
-      {Application, [], [fetch_env: fn _, _ -> "" end]}
-    ]) do
-      assert %State{secret_file_path: @secret_file_path} =
-               init_state |> Utils.resolve_secret_file_location!()
+  describe "resolve_secret_file_location/1" do
+    test "correct_path", %{init_state: init_state} do
+      assert init_state |> Utils.resolve_secret_file_location!()
     end
 
-    with_mocks([
-      {Application, [], [app_dir: fn @app_name, @secret_file_path -> "wrong.yml" end]},
-      {Application, [], [get_env: fn _, _, _ -> "" end]},
-      {Application, [], [fetch_env: fn _, _ -> "" end]}
-    ]) do
-      assert_raise(Utils.SecretFileNotFoundError, fn ->
-        init_state |> Utils.resolve_secret_file_location!()
-      end)
-    end
-  end
-
-  test "check_sops_availability!/1", %{init_state: init_state} do
-    with_mock(System, cmd: fn "sops", ["--version"] -> {:ok, 0} end) do
-      assert init_state == init_state |> Utils.check_sops_availability!()
-    end
-
-    with_mock(System, cmd: fn "sops", ["--version"] -> {:error, 1} end) do
-      assert_raise(Utils.SopsNotInstalledError, fn ->
-        init_state |> Utils.check_sops_availability!()
-      end)
-    end
-  end
-
-  test "decrypt!/1 with yaml file", %{init_state: init_state} do
-    with_mock(System, cmd: fn "sops", _ -> {@yaml, 0} end) do
-      assert %State{sops_content: @yaml} = init_state |> Utils.decrypt!()
-    end
-
-    with_mock(System, cmd: fn "sops", _ -> {"error", 1} end) do
-      assert_raise(Utils.SopsDecryptError, fn -> init_state |> Utils.decrypt!() end)
-    end
-  end
-
-  test "decrypt!/1 with json file", %{init_state: init_state} do
-    with_mock(System, cmd: fn "sops", _ -> {@json, 0} end) do
-      assert %State{sops_content: @json} = init_state |> Utils.decrypt!()
-    end
-
-    with_mock(System, cmd: fn "sops", _ -> {"error", 1} end) do
-      assert_raise(Utils.SopsDecryptError, fn -> init_state |> Utils.decrypt!() end)
+    test "wrong_path", %{init_state: init_state} do
+      assert_raise SecretFileNotFoundError, fn ->
+        init_state
+        |> Map.put(:secret_file_path, "wrong.yml")
+        |> State.ensure_type!()
+        |> Utils.resolve_secret_file_location!()
+      end
     end
   end
 

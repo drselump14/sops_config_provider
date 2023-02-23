@@ -13,22 +13,6 @@ defmodule SopsConfigProvider.Utils do
     end
   end
 
-  defmodule SopsNotInstalledError do
-    defexception [:message]
-
-    def exception(sops_binary_path) do
-      %__MODULE__{message: "[ERROR] Sops not found/installed in #{sops_binary_path}"}
-    end
-  end
-
-  defmodule SopsDecryptError do
-    defexception [:message]
-
-    def exception(detail) do
-      %__MODULE__{message: "[ERROR] SOPS is unable to decrypt the file. Detail: #{detail}"}
-    end
-  end
-
   defmodule YAMLReadError do
     defexception [:message]
 
@@ -60,14 +44,6 @@ defmodule SopsConfigProvider.Utils do
     state |> Map.put(:secret_file_path, file_path) |> State.ensure_type!()
   end
 
-  @spec check_sops_availability!(State.t()) :: State.t()
-  def check_sops_availability!(%State{sops_binary_path: sops_binary_path} = state) do
-    case System.cmd(sops_binary_path, ["--version"]) do
-      {_output, 0} -> state
-      _ -> raise SopsNotInstalledError, sops_binary_path
-    end
-  end
-
   @spec get_file_type(State.t()) :: State.t()
   def get_file_type(%State{secret_file_path: secret_file_path} = state) do
     file_type =
@@ -78,16 +54,6 @@ defmodule SopsConfigProvider.Utils do
       end
 
     state |> Map.put(:file_type, file_type) |> State.ensure_type!()
-  end
-
-  @spec decrypt!(State.t()) :: State.t()
-  def decrypt!(
-        %State{sops_binary_path: sops_binary_path, secret_file_path: secret_file_path} = state
-      ) do
-    case System.cmd(sops_binary_path, ["-d", secret_file_path]) do
-      {output, 0} -> state |> Map.put(:sops_content, output) |> State.ensure_type!()
-      {error, _} -> raise SopsDecryptError, error
-    end
   end
 
   def convert_to_map!(%State{sops_content: sops_content, file_type: :yaml}) do
