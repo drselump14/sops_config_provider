@@ -21,7 +21,7 @@ defmodule SopsConfigProvider do
   end
 
   @impl true
-  @spec init(State.t()) :: State.t()
+  @spec init(State.t() | term()) :: State.t()
   def init(%State{} = state), do: state
 
   def init(_),
