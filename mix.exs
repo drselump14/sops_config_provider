@@ -70,7 +70,7 @@ defmodule SopsConfigProvider.MixProject do
 
   defp package do
     [
-      files: ~w(lib mix.exs README.md LICENSE.md),
+      files: ~w(lib mix.exs README.md LICENSE),
       maintainers: ["Slamet Kristanto"],
       licenses: ["MIT"],
       links: %{
