@@ -7,12 +7,12 @@ defmodule SopsConfigProvider do
 
   defmodule InitStateError do
     defexception message: ~s"""
-                    Please set %SopsConfigProvider.State{} as second parameter on the release.
+                    Please set appropriate options maps as second parameter on the release.
                     Example:
                       release: [
                          my_app: [
                            config_providers: [
-                             {SopsConfigProvider, SopsConfigProvider.State.new!(app_name: :my_app, secret_file_path: "/path", sops_binary_path: "/usr/local/bin/sops")}
+                             {SopsConfigProvider, %{app_name: :my_app, secret_file_path: "/path", sops_binary_path: "/usr/local/bin/sops"}}
                            ]
                          ]
                       ]
