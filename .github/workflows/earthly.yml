@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  FORCE_COLOR: 1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Prepare Earthly
+        uses: ./.github/actions/setup_earthly
+        with:
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Copy event.json
+        run: |
+          mkdir tmp
+          cp /home/runner/work/_temp/_github_workflow/event.json ./tmp/
+
+      - name: Run Linter
+        run: earthly --ci --push +linter
+
+      - name: Run test
+        run: |
+          earthly --ci --push +test \
+          --GITHUB_TOKEN=${{ github.token }} \
+          --GITHUB_SHA=$GITHUB_SHA \
+          --GITHUB_REF=$GITHUB_REF \
+          --GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME
