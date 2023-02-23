@@ -38,6 +38,7 @@ defmodule SopsConfigProvider do
       |> Utils.get_file_type()
       |> Sops.decrypt!()
       |> Utils.convert_to_map!()
+      |> Map.to_list()
 
     Config.Reader.merge(
       config,

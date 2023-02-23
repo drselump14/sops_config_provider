@@ -7,7 +7,7 @@ defmodule SopsConfigProvider.MixProject do
   def project do
     [
       app: :sops_config_provider,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.13",
       compilers: [:domo_compiler] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
