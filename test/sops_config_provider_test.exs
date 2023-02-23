@@ -79,7 +79,7 @@ defmodule SopsConfigProviderTest do
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
 
       stub(SopsMock, :decrypt!, fn state ->
-        state |> Sops.decrypt!()
+        raise SopsDecryptError, "error"
       end)
 
       assert_raise SopsDecryptError, fn -> config |> SopsConfigProvider.load(init_state) end
