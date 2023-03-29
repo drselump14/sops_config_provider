@@ -58,7 +58,7 @@ defmodule SopsConfigProvider.Utils do
 
   def convert_to_map!(%State{sops_content: sops_content, file_type: :yaml}) do
     case YamlElixir.read_from_string(sops_content, atoms: true) do
-      {:ok, content} -> content |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
+      {:ok, content} -> content |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
       {:error, detail} -> raise YAMLReadError, detail
     end
   end
