@@ -1,6 +1,7 @@
 # SopsConfigProvider
 
-Decrypt and load secrets from sops file to your application config.
+Decrypt secrets from sops file and set the config to your application on
+runtime.
 
 ## Installation
 
@@ -42,15 +43,19 @@ After the installation, you need to add the provider into `def project` section 
       ]
 ```
 
-In your release, the secrets content would be loaded into `config :sops`,
-which can be called with `Application.get_env/2`.
+The config provider will decrypt the secrets and set the config like you do in
+runtime.exs
 
 For example, if you have secrets config in yaml as below
 
 ```yaml
 # priv/secrets.yml
-hello: world
+sentry:
+    dsn: "https://sentry.io"
 ```
 
-Then, you can fetch the value with `Application.get_env(:sops, :hello) #
-=> "world"`
+It'll set the value below and app boot like on `runtime.exs`
+
+```elixir
+config :sentry, dsn: "http://sentry.io"
+```

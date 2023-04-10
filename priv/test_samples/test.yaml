@@ -1,0 +1,8 @@
+stripe:
+  api_key: "stripe_api_key"
+sentry:
+  dsn: "https://ingest.sentry"
+deep_nested:
+  first_branch:
+    second_branch:
+      leaf: "value"

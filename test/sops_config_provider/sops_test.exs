@@ -18,7 +18,7 @@ defmodule SopsConfigProvider.SopsTest do
   @json "{\"a\":1}"
 
   @app_name :sops_config_provider
-  @secret_file_path "priv/test_samples/test.yml"
+  @secret_file_path "priv/test_samples/test.yaml"
 
   setup %{} do
     init_state =

@@ -3,6 +3,7 @@ defmodule SopsConfigProvider.Utils do
   Utils to process sops encrypted file
   """
 
+  alias SopsConfigProvider.NestedMap
   alias SopsConfigProvider.State
 
   defmodule SecretFileNotFoundError do
@@ -56,16 +57,16 @@ defmodule SopsConfigProvider.Utils do
     state |> Map.put(:file_type, file_type) |> State.ensure_type!()
   end
 
-  def convert_to_map!(%State{sops_content: sops_content, file_type: :yaml}) do
-    case YamlElixir.read_from_string(sops_content, atoms: true) do
-      {:ok, content} -> content |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+  def convert_to_keyword_list!(%State{sops_content: sops_content, file_type: :yaml}) do
+    case YamlElixir.read_from_string(sops_content) do
+      {:ok, content} -> content |> NestedMap.to_keyword_list()
       {:error, detail} -> raise YAMLReadError, detail
     end
   end
 
-  def convert_to_map!(%State{sops_content: sops_content, file_type: :json}) do
-    case sops_content |> Jason.decode(keys: :atoms!) do
-      {:ok, content} -> content
+  def convert_to_keyword_list!(%State{sops_content: sops_content, file_type: :json}) do
+    case sops_content |> Jason.decode() do
+      {:ok, content} -> content |> NestedMap.to_keyword_list()
       {:error, detail} -> raise JSONReadError, detail
     end
   end
