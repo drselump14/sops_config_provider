@@ -37,12 +37,11 @@ defmodule SopsConfigProvider do
       |> Utils.resolve_secret_file_location!()
       |> Utils.get_file_type()
       |> Sops.decrypt!()
-      |> Utils.convert_to_map!()
-      |> Map.to_list()
+      |> Utils.convert_to_keyword_list!()
 
     Config.Reader.merge(
       config,
-      sops: sops_config
+      sops_config
     )
   end
 end

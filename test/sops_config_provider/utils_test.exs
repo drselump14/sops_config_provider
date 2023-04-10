@@ -9,8 +9,12 @@ defmodule SopsConfigProvider.UtilsTest do
     a: 1
   """
 
+  @keyword_list [
+    a: 1
+  ]
+
   @app_name :sops_config_provider
-  @secret_file_path "priv/test_samples/test.yml"
+  @secret_file_path "priv/test_samples/test.yaml"
 
   setup %{} do
     init_state =
@@ -56,19 +60,18 @@ defmodule SopsConfigProvider.UtilsTest do
     assert(%State{file_type: :json} = Utils.get_file_type(state))
   end
 
-  test "convert_to_map!/1 when file_type is yaml", %{init_state: init_state} do
+  test "convert_to_keyword_list!/1 when file_type is yaml", %{init_state: init_state} do
     state =
       init_state
       |> Map.put(:sops_content, @yaml)
       |> Map.put(:file_type, :yaml)
       |> State.ensure_type!()
 
-    assert Utils.convert_to_map!(state) == %{a: 1}
+    assert Utils.convert_to_keyword_list!(state) == @keyword_list
   end
 
-  test "convert_to_map!/1 when file_type is json", %{init_state: init_state} do
-    map = %{a: 1}
-    json = map |> Jason.encode!()
+  test "convert_to_keyword_list!/1 when file_type is json", %{init_state: init_state} do
+    json = ~S({"a": 1})
 
     state =
       init_state
@@ -76,6 +79,6 @@ defmodule SopsConfigProvider.UtilsTest do
       |> Map.put(:file_type, :json)
       |> State.ensure_type!()
 
-    assert Utils.convert_to_map!(state) == map
+    assert Utils.convert_to_keyword_list!(state) == @keyword_list
   end
 end

@@ -1,7 +1,6 @@
 defmodule SopsConfigProviderTest do
   use ExUnit.Case, async: true
   alias SopsConfigProvider.InitStateError
-  alias SopsConfigProvider.Sops
   alias SopsConfigProvider.Sops.SopsDecryptError
   alias SopsConfigProvider.State
 
@@ -11,12 +10,14 @@ defmodule SopsConfigProviderTest do
   doctest SopsConfigProvider
   rewire(SopsConfigProvider, Sops: SopsMock)
 
+  @sentry_dsn "https://sentry.io"
   @yaml """
-    a: 1
+    sentry:
+      dsn: #{@sentry_dsn}
   """
 
   @app_name :sops_config_provider
-  @secret_file_path "priv/test_samples/test.yml"
+  @secret_file_path "priv/test_samples/test.yaml"
 
   describe "init/1" do
     test "when the argument is map" do
@@ -64,21 +65,21 @@ defmodule SopsConfigProviderTest do
         state |> Map.put(:sops_content, @yaml) |> State.ensure_type!()
       end)
 
-      # Make sure the old config doesn't have :sops key
-      refute config |> Keyword.has_key?(:sops)
+      # Make sure the old config doesn't have :sentry key
+      refute config |> Keyword.has_key?(:sentry)
 
       assert new_config = config |> SopsConfigProvider.load(init_state)
 
-      assert new_config |> Keyword.has_key?(:sops)
+      assert new_config |> Keyword.has_key?(:sentry)
 
       assert new_config[:b] == "2"
-      assert new_config[:sops][:a] == 1
+      assert new_config[:sentry][:dsn] == @sentry_dsn
     end
 
     test "when failed", %{init_state: init_state, config: config} do
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
 
-      stub(SopsMock, :decrypt!, fn state ->
+      stub(SopsMock, :decrypt!, fn _state ->
         raise SopsDecryptError, "error"
       end)
 
