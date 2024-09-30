@@ -36,11 +36,24 @@ defmodule SopsConfigProvider.Sops do
   @impl SopsBehavior
   @spec decrypt!(State.t()) :: State.t()
   def decrypt!(
-        %State{sops_binary_path: sops_binary_path, secret_file_path: secret_file_path} = state
+        %State{
+          sops_binary_path: sops_binary_path,
+          secret_file_path: secret_file_path,
+          execution_dir: execution_dir,
+          env_variables: env_variables
+        } = state
       ) do
-    case System.cmd(sops_binary_path, ["-d", secret_file_path]) do
-      {output, 0} -> state |> Map.put(:sops_content, output) |> State.ensure_type!()
-      {error, _} -> raise SopsDecryptError, error
+    case System.cmd(sops_binary_path, ["-d", secret_file_path],
+           cd: execution_dir,
+           env: env_variables
+         ) do
+      {output, 0} ->
+        state
+        |> Map.put(:sops_content, output)
+        |> State.ensure_type!()
+
+      {error, _} ->
+        raise SopsDecryptError, error
     end
   end
 end

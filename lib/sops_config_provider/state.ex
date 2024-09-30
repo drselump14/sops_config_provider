@@ -13,5 +13,8 @@ defmodule SopsConfigProvider.State do
     field(:file_type, available_file_type(), default: nil)
     field(:sops_binary_path, binary(), default: "sops")
     field(:sops_content, binary())
+    field(:config_env, atom(), default: :prod)
+    field(:execution_dir, binary(), default: "./")
+    field(:env_variables, [{binary(), binary() | nil}], default: [])
   end
 end
