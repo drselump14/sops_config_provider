@@ -48,12 +48,12 @@ defmodule SopsConfigProvider.SopsTest do
 
   describe "decrypt!/1 with yaml file" do
     test "when success", %{init_state: init_state} do
-      stub(SystemMock, :cmd, fn "sops", _ -> {@yaml, 0} end)
+      stub(SystemMock, :cmd, fn "sops", _, _ -> {@yaml, 0} end)
       assert %State{sops_content: @yaml} = init_state |> Sops.decrypt!()
     end
 
     test "when failed", %{init_state: init_state} do
-      stub(SystemMock, :cmd, fn "sops", _ -> {"error", 1} end)
+      stub(SystemMock, :cmd, fn "sops", _, _ -> {"error", 1} end)
 
       assert_raise(SopsDecryptError, fn -> init_state |> Sops.decrypt!() end)
     end
@@ -61,12 +61,12 @@ defmodule SopsConfigProvider.SopsTest do
 
   describe "decrypt!/1 with json file" do
     test "when success", %{init_state: init_state} do
-      stub(SystemMock, :cmd, fn "sops", _ -> {@json, 0} end)
+      stub(SystemMock, :cmd, fn "sops", _, _ -> {@json, 0} end)
       assert %State{sops_content: @json} = init_state |> Sops.decrypt!()
     end
 
     test "when failed", %{init_state: init_state} do
-      stub(SystemMock, :cmd, fn "sops", _ -> {"error", 1} end)
+      stub(SystemMock, :cmd, fn "sops", _, _ -> {"error", 1} end)
 
       assert_raise(SopsDecryptError, fn -> init_state |> Sops.decrypt!() end)
     end
