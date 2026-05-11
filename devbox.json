@@ -18,7 +18,10 @@
       "eval \"$(mise activate bash)\"",
       "export PATH=\"$MISE_SHIMS_DIR:$PATH\"",
       "mise trust",
-      "mise install"
+      "mise install",
+      "mix local.hex --force --quiet 2>/dev/null || true",
+      "mix local.rebar --force --quiet 2>/dev/null || true",
+      "mix deps.get 2>/dev/null || true"
     ],
     "persistent_dirs": [
       ".devbox/mise_data",
