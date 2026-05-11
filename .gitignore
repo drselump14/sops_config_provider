@@ -24,3 +24,7 @@ sops_config_provider-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Devbox local environment
+.devbox/
+.envrc

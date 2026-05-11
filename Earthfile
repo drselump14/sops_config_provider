@@ -1,8 +1,8 @@
 VERSION 0.6
 
-ARG ELIXIR=1.14.1
-ARG OTP=25.1.2
-FROM hexpm/elixir:$ELIXIR-erlang-$OTP-alpine-3.16.2
+ARG ELIXIR=1.19.1
+ARG OTP=28.1
+FROM hexpm/elixir:$ELIXIR-erlang-$OTP-alpine-3.22.4
 WORKDIR /src
 
 setup-mix:
@@ -61,6 +61,6 @@ test:
 
   COPY . .
 
-  RUN mix coveralls.github
+  RUN MIX_ENV=test mix coveralls.github
   SAVE ARTIFACT /src
   SAVE IMAGE --push ghcr.io/drselump14/sops_config_provider:compile_test
