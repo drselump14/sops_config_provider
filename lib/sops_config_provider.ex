@@ -1,9 +1,14 @@
 defmodule SopsConfigProvider do
   @behaviour Config.Provider
 
-  alias SopsConfigProvider.Sops
   alias SopsConfigProvider.State
   alias SopsConfigProvider.Utils
+
+  @sops_module Application.compile_env(
+                 :sops_config_provider,
+                 :sops_module,
+                 SopsConfigProvider.Sops
+               )
 
   defmodule InitStateError do
     defexception message: ~s"""
@@ -33,10 +38,10 @@ defmodule SopsConfigProvider do
 
     sops_config =
       state
-      |> Sops.check_sops_availability!()
+      |> @sops_module.check_sops_availability!()
       |> Utils.resolve_secret_file_location!()
       |> Utils.get_file_type()
-      |> Sops.decrypt!()
+      |> @sops_module.decrypt!()
       |> Utils.convert_to_keyword_list!()
 
     Config.Reader.merge(

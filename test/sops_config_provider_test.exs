@@ -1,14 +1,12 @@
 defmodule SopsConfigProviderTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   alias SopsConfigProvider.InitStateError
   alias SopsConfigProvider.Sops.SopsDecryptError
   alias SopsConfigProvider.State
 
   import Hammox
-  import Rewire
 
   doctest SopsConfigProvider
-  rewire(SopsConfigProvider, Sops: SopsMock)
 
   @sentry_dsn "https://sentry.io"
   @yaml """

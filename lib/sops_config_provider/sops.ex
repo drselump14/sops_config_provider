@@ -8,6 +8,8 @@ defmodule SopsConfigProvider.Sops do
 
   @behaviour SopsBehavior
 
+  @system_module Application.compile_env(:sops_config_provider, :system_module, System)
+
   defmodule SopsNotInstalledError do
     defexception [:message]
 
@@ -27,7 +29,7 @@ defmodule SopsConfigProvider.Sops do
   @impl SopsBehavior
   @spec check_sops_availability!(State.t()) :: State.t()
   def check_sops_availability!(%State{sops_binary_path: sops_binary_path} = state) do
-    case System.cmd(sops_binary_path, ["--version"]) do
+    case @system_module.cmd(sops_binary_path, ["--version"]) do
       {_output, 0} -> state
       _ -> raise SopsNotInstalledError, sops_binary_path
     end
@@ -43,7 +45,7 @@ defmodule SopsConfigProvider.Sops do
           env_variables: env_variables
         } = state
       ) do
-    case System.cmd(sops_binary_path, ["-d", secret_file_path],
+    case @system_module.cmd(sops_binary_path, ["-d", secret_file_path],
            cd: execution_dir,
            env: env_variables
          ) do

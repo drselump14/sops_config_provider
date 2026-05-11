@@ -7,20 +7,12 @@ defmodule SopsConfigProvider.MixProject do
   def project do
     [
       app: :sops_config_provider,
-      version: "0.2.1",
+      version: "0.2.2",
       elixir: "~> 1.13",
       compilers: [:domo_compiler] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
-        coveralls: :test,
-        "coveralls.github": :test,
-        "test.watch": :test,
-        "coveralls.detail": :test,
-        "coveralls.post": :test,
-        "coveralls.html": :test
-      ],
       deps: deps(),
       package: package(),
       name: "SopsConfigProvider",
@@ -44,28 +36,38 @@ defmodule SopsConfigProvider.MixProject do
     ]
   end
 
+  def cli do
+    [
+      preferred_envs: [
+        coveralls: :test,
+        "coveralls.github": :test,
+        "test.watch": :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
+    ]
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:domo, "~> 1.5"},
-      {:decimal, "~> 2.0"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:doctor, "~> 0.19.0", only: :dev},
-      {:excoveralls, "~> 0.10", only: [:dev, :test]},
+      {:doctor, "~> 0.19.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
-      {:ex_machina, "~> 2.7.0"},
-      {:ex_unit_notifier, "~> 1.2", only: :test},
-      {:faker, "~> 0.17", only: [:dev, :test]},
-      {:gradient, github: "esl/gradient", only: [:dev], runtime: false},
-      {:git_hooks, "~> 0.7.0", only: [:dev], runtime: false},
+      {:ex_machina, "~> 2.7", only: :test, runtime: false},
+      {:ex_unit_notifier, "~> 1.2", only: :test, runtime: false},
+      {:faker, "~> 0.17", only: [:dev, :test], runtime: false},
+      {:git_hooks, "~> 0.7", only: [:dev], runtime: false},
       {:jason, "~> 1.4"},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:rewire, "~> 0.9", only: [:test]},
-      {:hammox, "~> 0.7", only: [:test]},
-      {:typed_struct, "~> 0.3.0"},
-      {:yaml_elixir, "~> 2.9.0"}
+      {:hammox, "~> 0.7", only: :test, runtime: false},
+      {:typed_struct, "~> 0.3"},
+      {:yaml_elixir, "~> 2.9"}
     ]
   end
 

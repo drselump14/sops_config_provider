@@ -1,5 +1,7 @@
 import Config
 
+import_config "#{config_env()}.exs"
+
 if Mix.env() == :dev do
   config :git_hooks,
     auto_install: true,

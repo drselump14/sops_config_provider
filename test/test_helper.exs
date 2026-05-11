@@ -1,4 +1,3 @@
-Hammox.defmock(SopsMock, for: SopsConfigProvider.SopsBehavior)
-Hammox.defmock(SystemMock, for: SopsConfigProvider.SystemBehavior)
+Application.ensure_all_started(:mox)
 ExUnit.start()
 Faker.start()

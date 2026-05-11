@@ -1,15 +1,12 @@
 defmodule SopsConfigProvider.SopsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
-  import Rewire
   import Hammox
 
   alias SopsConfigProvider.Sops
   alias SopsConfigProvider.Sops.SopsDecryptError
   alias SopsConfigProvider.Sops.SopsNotInstalledError
   alias SopsConfigProvider.State
-
-  rewire(Sops, System: SystemMock)
 
   @yaml """
     a: 1
