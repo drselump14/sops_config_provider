@@ -16,5 +16,7 @@ defmodule SopsConfigProvider.State do
     field(:config_env, atom(), default: :prod)
     field(:execution_dir, binary(), default: "./")
     field(:env_variables, [{binary(), binary() | nil}], default: [])
+    field(:mappings, map(), default: %{})
+    field(:env_override, boolean(), default: false)
   end
 end

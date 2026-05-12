@@ -59,3 +59,116 @@ It'll set the value below and app boot like on `runtime.exs`
 ```elixir
 config :sentry, dsn: "http://sentry.io"
 ```
+
+## Options
+
+Pass options as a map (second element of the tuple) in `config_providers`.
+
+| Option | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `app_name` | `atom` | yes | — | Your app name. Used to resolve `secret_file_path` via `Application.app_dir/2`. |
+| `secret_file_path` | `string` | yes | — | Path to the SOPS-encrypted file relative to the app dir. Supports `.json`, `.yaml`, `.yml`. |
+| `sops_binary_path` | `string` | no | `"sops"` | Path to the `sops` binary. Override if sops is not on `PATH`. |
+| `execution_dir` | `string` | no | `"./"` | Working directory used when running `sops -d`. Relevant when sops resolves key config (e.g., `.sops.yaml`) relative to cwd. |
+| `env_variables` | `[{string, string}]` | no | `[]` | Environment variables injected into the sops process. Useful for passing AWS/GCP credentials at runtime. |
+| `mappings` | `map` | no | `%{}` | Remap flat secret keys into nested module configs. See [Mappings](#mappings) below. |
+| `env_override` | `boolean` | no | `false` | Allow OS env vars to override decrypted SOPS values. See [Env Override](#env-override) below. |
+| `config_env` | `atom` | no | `:prod` | Config environment. |
+
+### Mappings
+
+`mappings` lets you nest a secret key under a specific module within an app's config.
+
+Structure:
+
+```elixir
+%{
+  app_atom => %{
+    secret_key => {TargetModule, :nested_key}
+  }
+}
+```
+
+Example — map `:db_url` in `:my_app` into `{MyApp.Repo, :url}`:
+
+```elixir
+{
+  SopsConfigProvider,
+  %{
+    app_name: :my_app,
+    secret_file_path: "priv/secrets.yml",
+    mappings: %{
+      my_app: %{
+        db_url: {MyApp.Repo, :url}
+      }
+    }
+  }
+}
+```
+
+Given this secret file:
+
+```yaml
+my_app:
+  db_url: "ecto://user:pass@localhost/mydb"
+  other_key: "value"
+```
+
+Produces:
+
+```elixir
+config :my_app, MyApp.Repo, url: "ecto://user:pass@localhost/mydb"
+config :my_app, other_key: "value"
+```
+
+### Env Override
+
+Set `env_override: true` to allow OS environment variables to override values from the SOPS file. Useful for emergency overrides or per-deploy flexibility without re-encrypting the secrets file.
+
+**Naming convention:** `APP_KEY` — the app atom and config key joined with `_`, uppercased.
+
+| YAML key | App | Derived env var |
+|---|---|---|
+| `api_key` | `stripity_stripe` | `STRIPITY_STRIPE_API_KEY` |
+| `dsn` | `sentry` | `SENTRY_DSN` |
+| `password` | `orca` | `ORCA_PASSWORD` |
+| `webhook` | `slack` | `SLACK_WEBHOOK` |
+
+Only flat atom keys are overridable. Nested module keys (set via `mappings`) are not derived and must be changed via the SOPS file.
+
+An env var is ignored if it is not set or is an empty string — the SOPS value is used as-is.
+
+```elixir
+{
+  SopsConfigProvider,
+  %{
+    app_name: :my_app,
+    secret_file_path: "priv/secrets.yml",
+    env_override: true,
+    mappings: %{
+      my_app: %{
+        database_url: {MyApp.Repo, :url}
+      }
+    }
+  }
+}
+```
+
+With this config, setting `SENTRY_DSN=https://new-dsn` as an OS env var overrides the `sentry > dsn` value from the SOPS file at runtime. No re-encryption needed.
+
+### env_variables example
+
+Pass AWS credentials when the runtime environment doesn't have them on the system:
+
+```elixir
+{
+  SopsConfigProvider,
+  %{
+    app_name: :my_app,
+    secret_file_path: "priv/secrets.yml",
+    env_variables: [
+      {"AWS_ACCESS_KEY_ID", System.get_env("AWS_ACCESS_KEY_ID")},
+      {"AWS_SECRET_ACCESS_KEY", System.get_env("AWS_SECRET_ACCESS_KEY")}
+    ]
+  }
+}
