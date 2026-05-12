@@ -198,6 +198,7 @@ defmodule SopsConfigProviderTest do
       on_exit(fn -> System.delete_env("MYAPP_API_KEY") end)
 
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
       stub(SopsMock, :decrypt!, fn state ->
         state |> Map.put(:sops_content, @yaml_for_override) |> State.ensure_type!()
       end)
@@ -211,6 +212,7 @@ defmodule SopsConfigProviderTest do
       System.delete_env("MYAPP_API_KEY")
 
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
       stub(SopsMock, :decrypt!, fn state ->
         state |> Map.put(:sops_content, @yaml_for_override) |> State.ensure_type!()
       end)
@@ -225,6 +227,7 @@ defmodule SopsConfigProviderTest do
       on_exit(fn -> System.delete_env("MYAPP_API_KEY") end)
 
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
       stub(SopsMock, :decrypt!, fn state ->
         state |> Map.put(:sops_content, @yaml_for_override) |> State.ensure_type!()
       end)
@@ -236,6 +239,7 @@ defmodule SopsConfigProviderTest do
 
     test "unset env var leaves other keys unchanged", %{init_state: init_state, config: config} do
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
       stub(SopsMock, :decrypt!, fn state ->
         state |> Map.put(:sops_content, @yaml_for_override) |> State.ensure_type!()
       end)
@@ -259,6 +263,7 @@ defmodule SopsConfigProviderTest do
         )
 
       stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
       stub(SopsMock, :decrypt!, fn state ->
         state |> Map.put(:sops_content, @yaml_for_override) |> State.ensure_type!()
       end)

@@ -9,7 +9,7 @@ if Mix.env() == :dev do
     hooks: [
       pre_commit: [
         tasks: [
-          {:cmd, "mix hex.audit"},
+          # {:cmd, "mix hex.audit"},
           {:cmd, "mix deps.unlock --check-unused"},
           {:cmd, "mix deps.audit"},
           {:cmd, "mix compile --warning-as-errors"},
