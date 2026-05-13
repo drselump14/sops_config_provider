@@ -53,9 +53,9 @@ defmodule SopsConfigProvider.MixProject do
   defp deps do
     [
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:decimal, "~> 3.1"},
       {:domo, "~> 1.5"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:doctor, "~> 0.19.0", only: :dev, runtime: false},
       {:excoveralls, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:ex_machina, "~> 2.7", only: :test, runtime: false},
