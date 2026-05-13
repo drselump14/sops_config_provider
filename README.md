@@ -11,7 +11,7 @@ by adding `sops_config_provider` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:sops_config_provider, "~> 0.1.0"}
+    {:sops_config_provider, "~> 0.4.0"}
   ]
 end
 ```
@@ -67,13 +67,52 @@ Pass options as a map (second element of the tuple) in `config_providers`.
 | Option | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `app_name` | `atom` | yes | — | Your app name. Used to resolve `secret_file_path` via `Application.app_dir/2`. |
-| `secret_file_path` | `string` | yes | — | Path to the SOPS-encrypted file relative to the app dir. Supports `.json`, `.yaml`, `.yml`. |
+| `secret_file_path` | `string` | yes | — | Path to the SOPS-encrypted file relative to the app dir. Supports `.json`, `.yaml`, `.yml`. Accepts a comma-separated list of paths — files are decrypted in order, later values override earlier ones on key conflict. |
 | `sops_binary_path` | `string` | no | `"sops"` | Path to the `sops` binary. Override if sops is not on `PATH`. |
 | `execution_dir` | `string` | no | `"./"` | Working directory used when running `sops -d`. Relevant when sops resolves key config (e.g., `.sops.yaml`) relative to cwd. |
 | `env_variables` | `[{string, string}]` | no | `[]` | Environment variables injected into the sops process. Useful for passing AWS/GCP credentials at runtime. |
 | `mappings` | `map` | no | `%{}` | Remap flat secret keys into nested module configs. See [Mappings](#mappings) below. |
 | `env_override` | `boolean` | no | `false` | Allow OS env vars to override decrypted SOPS values. See [Env Override](#env-override) below. |
 | `config_env` | `atom` | no | `:prod` | Config environment. |
+
+### Multiple secret files
+
+Pass a comma-separated list to `secret_file_path` to load and merge multiple SOPS files. Files are decrypted in order — later files win on key conflict, unique keys from all files are preserved.
+
+```elixir
+{
+  SopsConfigProvider,
+  %{
+    app_name: :my_app,
+    secret_file_path: "priv/shared.enc.yaml, priv/app.enc.yaml"
+  }
+}
+```
+
+Given:
+
+```yaml
+# priv/shared.enc.yaml
+sentry:
+  dsn: "https://shared.sentry"
+myapp:
+  timeout: 5000
+```
+
+```yaml
+# priv/app.enc.yaml
+sentry:
+  dsn: "https://app.sentry"
+myapp:
+  db_url: "ecto://user:pass@host/db"
+```
+
+Produces (app.enc.yaml wins on `sentry.dsn`, both files contribute unique keys):
+
+```elixir
+config :sentry, dsn: "https://app.sentry"
+config :myapp, timeout: 5000, db_url: "ecto://user:pass@host/db"
+```
 
 ### Mappings
 

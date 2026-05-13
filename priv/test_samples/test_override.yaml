@@ -1,0 +1,4 @@
+sentry:
+  dsn: "https://override.sentry"
+extra:
+  key: "extra_value"

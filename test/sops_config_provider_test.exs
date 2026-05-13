@@ -83,6 +83,69 @@ defmodule SopsConfigProviderTest do
     end
   end
 
+  describe "load/2 with comma-separated secret_file_path" do
+    @yaml_base """
+      sentry:
+        dsn: "base_dsn"
+      myapp:
+        host: "base_host"
+    """
+
+    @yaml_override_multi """
+      sentry:
+        dsn: "override_dsn"
+      extra:
+        key: "extra_value"
+    """
+
+    @secret_file_path_override "priv/test_samples/test_override.yaml"
+
+    test "later file overrides earlier on conflict, unique keys from both are preserved" do
+      init_state =
+        State.new!(
+          app_name: @app_name,
+          secret_file_path: "#{@secret_file_path}, #{@secret_file_path_override}",
+          sops_binary_path: "sops"
+        )
+
+      stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
+      stub(SopsMock, :decrypt!, fn state ->
+        content =
+          if String.ends_with?(state.secret_file_path, "test_override.yaml"),
+            do: @yaml_override_multi,
+            else: @yaml_base
+
+        state |> Map.put(:sops_content, content) |> State.ensure_type!()
+      end)
+
+      new_config = SopsConfigProvider.load([], init_state)
+
+      assert new_config[:sentry][:dsn] == "override_dsn"
+      assert new_config[:myapp][:host] == "base_host"
+      assert new_config[:extra][:key] == "extra_value"
+    end
+
+    test "single path behaves unchanged" do
+      init_state =
+        State.new!(
+          app_name: @app_name,
+          secret_file_path: @secret_file_path,
+          sops_binary_path: "sops"
+        )
+
+      stub(SopsMock, :check_sops_availability!, fn state -> state end)
+
+      stub(SopsMock, :decrypt!, fn state ->
+        state |> Map.put(:sops_content, @yaml) |> State.ensure_type!()
+      end)
+
+      new_config = SopsConfigProvider.load([], init_state)
+
+      assert new_config[:sentry][:dsn] == @sentry_dsn
+    end
+  end
+
   describe "load/2 with mappings" do
     @yaml_with_mappings """
       myapp:

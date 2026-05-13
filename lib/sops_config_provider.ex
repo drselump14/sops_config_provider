@@ -34,17 +34,29 @@ defmodule SopsConfigProvider do
 
   @impl true
   def load(config, %State{mappings: mappings, env_override: env_override} = state) do
+    checked_state = @sops_module.check_sops_availability!(state)
+
     sops_config =
-      state
-      |> @sops_module.check_sops_availability!()
-      |> Utils.resolve_secret_file_location!()
-      |> Utils.get_file_type()
-      |> @sops_module.decrypt!()
-      |> Utils.convert_to_keyword_list!()
+      checked_state
+      |> get_paths()
+      |> Enum.reduce([], fn path, acc ->
+        file_config =
+          %{checked_state | secret_file_path: path}
+          |> Utils.resolve_secret_file_location!()
+          |> Utils.get_file_type()
+          |> @sops_module.decrypt!()
+          |> Utils.convert_to_keyword_list!()
+
+        Config.Reader.merge(acc, file_config)
+      end)
       |> apply_mappings(mappings)
       |> apply_env_overrides(env_override)
 
     Config.Reader.merge(config, sops_config)
+  end
+
+  defp get_paths(%State{secret_file_path: path}) do
+    path |> String.split(",") |> Enum.map(&String.trim/1)
   end
 
   defp apply_mappings(sops_config, mappings) when map_size(mappings) == 0, do: sops_config
