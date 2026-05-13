@@ -28,11 +28,11 @@ jobs:
           cp /home/runner/work/_temp/_github_workflow/event.json ./tmp/
 
       - name: Run Linter
-        run: earthly --ci --push +linter
+        run: earthly --ci +linter
 
       - name: Run test
         run: |
-          earthly --ci --push +test \
+          earthly --ci +test \
           --GITHUB_TOKEN=${{ github.token }} \
           --GITHUB_SHA=$GITHUB_SHA \
           --GITHUB_REF=$GITHUB_REF \
